@@ -39,6 +39,20 @@ var ANS_CJK = new RegExp("([A-Za-z\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:
 var S_A = /(%)([A-Za-z])/g;
 var MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
+
+function convertToFullwidth(symbols) {
+    return symbols
+        .replace(/~/g, '～')
+        .replace(/!/g, '！')
+        .replace(/;/g, '；')
+        .replace(/:/g, '：')
+        .replace(/,/g, '，')
+        .replace(/\?/g, '？')
+        .replace(/“/g, '「')
+        .replace(/”/g, '」')
+        .replace(/(?:\p{Unified_Ideograph})\./ug, "。")
+}
+
 function panguSpacing(text) {
     if (typeof text !== 'string') {
         console.warn("spacing(text) only accepts string but got ".concat(_typeof(text)));
@@ -51,14 +65,7 @@ function panguSpacing(text) {
 
     var self = this;
     var newText = text;
-    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, function (match, leftCjk, symbols, rightCjk) {
-        var fullwidthSymbols = self.convertToFullwidth(symbols);
-        return "".concat(leftCjk).concat(fullwidthSymbols).concat(rightCjk);
-    });
-    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS, function (match, cjk, symbols) {
-        var fullwidthSymbols = self.convertToFullwidth(symbols);
-        return "".concat(cjk).concat(fullwidthSymbols);
-    });
+
     newText = newText.replace(DOTS_CJK, '$1 $2');
     newText = newText.replace(FIX_CJK_COLON_ANS, '$1：$2');
     newText = newText.replace(CJK_QUOTE, '$1 $2');
@@ -85,6 +92,16 @@ function panguSpacing(text) {
     newText = newText.replace(ANS_CJK, '$1 $2');
     newText = newText.replace(S_A, '$1 $2');
     newText = newText.replace(MIDDLE_DOT, '・');
+
+    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, function (match, leftCjk, symbols, rightCjk) {
+        var fullwidthSymbols = convertToFullwidth(symbols);
+        return "".concat(leftCjk).concat(fullwidthSymbols).concat(rightCjk);
+    });
+    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS, function (match, cjk, symbols) {
+        var fullwidthSymbols = convertToFullwidth(symbols);
+        return "".concat(cjk).concat(fullwidthSymbols);
+    });
+    newText = convertToFullwidth(newText)
     return newText;
 }
 
@@ -94,16 +111,7 @@ const selection = figma.currentPage.selection;
 
 const p = selection.map(t => {
     if (t.type === "TEXT") {
-        const newText = panguSpacing(t.characters.replace(/~/g, '～')
-            .replace(/!/g, '！')
-            .replace(/;/g, '；')
-            .replace(/:/g, '：')
-            .replace(/,/g, '，')
-            .replace(/\./g, '。')
-            .replace(/\?/g, '？')
-            .replace(/\“/g, '「')
-            .replace(/\”/g, '」')
-        );
+        const newText = panguSpacing(t.characters);
 
         async function font() {
             await figma.loadFontAsync({ family: t.fontName.family, style: t.fontName.style });
@@ -118,6 +126,7 @@ const p = selection.map(t => {
 })
 
 Promise.all(p).then(() => {
+    figma.notify("✅ Done");
     figma.closePlugin();
 
 })
