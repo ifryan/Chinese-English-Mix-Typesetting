@@ -45,12 +45,15 @@ function convertToFullwidth(symbols) {
         .replace(/~/g, '～')
         .replace(/!/g, '！')
         .replace(/;/g, '；')
-        .replace(/:/g, '：')
-        .replace(/,/g, '，')
+        // .replace(/:/g, '：')
+        // .replace(/,/g, '，')
         .replace(/\?/g, '？')
         .replace(/“/g, '「')
         .replace(/”/g, '」')
-        .replace(/(?:\p{Unified_Ideograph})\./ug, "。")
+        .replace(/(?:\p{Unified_Ideograph})\./ug, '。')
+        .replace(/(?:\p{Unified_Ideograph}):/ug, (...arg) => { return arg[0][0] + '：' })
+        .replace(/(?:\p{Unified_Ideograph}),/ug, (...arg) => { return arg[0][0] + '，' })
+    // .replace(/(?:\p{Unified_Ideograph})(,)/ug, '，')
 }
 
 function panguSpacing(text) {
@@ -116,6 +119,8 @@ const p = selection.map(t => {
         async function font() {
             await figma.loadFontAsync({ family: t.fontName.family, style: t.fontName.style });
             t.characters = newText;
+            // t.insertCharacters(0, newText,)
+            // t.deleteCharacters(newText.length, 2 * newText.length)
         }
 
 
