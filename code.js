@@ -50,6 +50,7 @@ function convertToFullwidth(symbols) {
         .replace(/\?/g, '？')
         .replace(/“/g, '「')
         .replace(/”/g, '」')
+        // 选定中文字符+符号的情况，再替换相应的全角字符
         .replace(/(?:\p{Unified_Ideograph})\./ug, '。')
         .replace(/(?:\p{Unified_Ideograph}):/ug, (...arg) => { return arg[0][0] + '：' })
         .replace(/(?:\p{Unified_Ideograph}),/ug, (...arg) => { return arg[0][0] + '，' })
