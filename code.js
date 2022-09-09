@@ -116,12 +116,13 @@ const selection = figma.currentPage.selection;
 const p = selection.map(t => {
     if (t.type === "TEXT") {
         const newText = panguSpacing(t.characters);
-
         async function font() {
-            await figma.loadFontAsync({ family: t.fontName.family, style: t.fontName.style });
+            await Promise.all(
+                t.getRangeAllFontNames(0, t.characters.length)
+                    .map(figma.loadFontAsync)
+            )
             t.characters = newText;
-            // t.insertCharacters(0, newText,)
-            // t.deleteCharacters(newText.length, 2 * newText.length)
+
         }
 
 
@@ -132,7 +133,7 @@ const p = selection.map(t => {
 })
 
 Promise.all(p).then(() => {
-    figma.notify("✅ Done");
+    figma.notify("✅ 已完成,请注意行内样式已被清除");
     figma.closePlugin();
 
 })
