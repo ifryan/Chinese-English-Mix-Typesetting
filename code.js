@@ -117,6 +117,8 @@ const p = selection.map(t => {
     if (t.type === "TEXT") {
         const newText = panguSpacing(t.characters);
         async function font() {
+
+            //读取样式为 mix 的文字
             await Promise.all(
                 t.getRangeAllFontNames(0, t.characters.length)
                     .map(figma.loadFontAsync)
